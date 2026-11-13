@@ -42,7 +42,9 @@ export function Header() {
   const { theme, toggleTheme } = usePreferences()
   const install = useInstallPrompt()
   return (
-    <header className="flex items-center justify-between gap-3">
+    // Wraps rather than overflows: in the narrow desktop sidebar (and on small
+    // phones once the Install button appears) the controls drop to a second row.
+    <header className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
       <a href="/" className="flex min-h-11 items-center gap-2.5 rounded-lg" aria-label="WeatherBoard home">
         <Logo />
         <span className="text-[17px] font-semibold tracking-tight">WeatherBoard</span>
@@ -51,8 +53,7 @@ export function Header() {
         {install.available && (
           <Button variant="ghost" onClick={install.prompt} className="px-3">
             <Download aria-hidden="true" className="size-4" />
-            <span className="hidden sm:inline lg:hidden xl:inline">Install</span>
-            <span className="sr-only sm:hidden lg:not-sr-only xl:hidden">Install app</span>
+            Install
           </Button>
         )}
         <UnitToggle />

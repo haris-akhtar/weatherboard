@@ -4,7 +4,7 @@ A responsive, installable weather dashboard: search any city, see current condit
 
 Built for the Edspire Frontend (React) Developer Technical Challenge, November 2026.
 
-**Live URL:** _not deployed yet — add the URL here after following [Deployment](#deployment)._
+**Live URL:** https://weatherboard-blond-ten.vercel.app
 
 | Desktop | Dark theme | Mobile |
 |---|---|---|
@@ -219,6 +219,7 @@ Run against the production build (`vite preview`) in Chromium via Playwright, at
 - Debounce and cancellation, measured on real requests: seven keystrokes 60 ms apart produced **one** request; changing the query while a request was in flight aborted it (`net::ERR_ABORTED`) and its result never appeared.
 - Weather: all current fields, five forecast days, source label, °C/°F switch without reload, persistence across reload.
 - **Live providers with real keys** (12 Nov 2026): typing "Karachi" returned GeoDB results (`200 wft-geo-db.p.rapidapi.com`, list labelled `Results from GeoDB Cities`); selecting it loaded current weather and a five-day forecast from OpenWeatherMap (`200` on both `/weather` and `/forecast`, card labelled `Live · OpenWeatherMap`), with no console errors. `npm run test:live` passed for OpenWeatherMap, GeoDB and Open-Meteo geocoding; the Open-Meteo weather check got a real `429` from the development machine's rate-limited IP in that run (it had passed in an earlier run).
+- **The deployed site** (13 Nov 2026, https://weatherboard-blond-ten.vercel.app): GeoDB suggestions and live OpenWeatherMap weather and forecast (all HTTP 200); service worker controlling the page; manifest fields; a reload while offline restored the last city and reconnecting returned to live data; no overflow at 375/768/1280; a missing asset returns 404; no console errors.
 - Fallback: a build with deliberately invalid keys received real `401` from OpenWeatherMap and `403` from GeoDB and fell back to Open-Meteo for both, labelled as such.
 - Favourites: add, five-city limit with explanation, switching, confirm / cancel / Escape on removal, persistence across reload, blocked `localStorage`.
 - Offline: banner, saved weather kept, **full reload while offline** (shell from the service worker, last city restored), another favourite restored from its saved copy, automatic refresh on reconnect.

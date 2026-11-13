@@ -1227,3 +1227,16 @@ The user pasted a transcript of a separate chat in which they had obtained an Op
 - In Chromium on the production build, searching "Karachi" returned GeoDB suggestions and loaded live OpenWeatherMap weather and forecast, with no console errors. No code changes were needed.
 - The keys were written only to a git-ignored `.env.local`; nothing containing them was committed or packaged.
 - The `lucide-react` error was diagnosed as an incomplete `node_modules` on the user's machine, not a code fault: the package is listed in `package.json` and the same source builds cleanly.
+
+---
+
+## Prompt 4 — deployment URL and a layout bug report (13 Nov 2026)
+
+The user sent the deployed URL (`https://weatherboard-blond-ten.vercel.app`) with no other text, and then a screenshot of the live site, also with no text. The screenshot showed the °C/°F toggle and theme button sliding underneath the search field on desktop.
+
+### Agent notes
+
+- **Deployment verified** against the live URL in Chromium: GeoDB and OpenWeatherMap returning live data, service worker and manifest, offline reload and reconnect, layout at three widths. Results are in the README.
+- **Bug found by the user, missed by the agent's tests.** Chrome shows an Install button only when it fires `beforeinstallprompt`, which never happens in headless test browsers. With that button present, the header no longer fitted the 280 px desktop sidebar and its controls overflowed under the search field. The earlier "no overflow" checks only measured page-level scrolling, so they could not catch one element overlapping another.
+- **Fix:** the header now wraps its controls onto a second row instead of overflowing. Verified by simulating the install event at 375, 768, 1024 and 1280 px and checking that no header control leaves the header or intersects the search form.
+- Lesson recorded: a feature that only appears on a real browser event needs that event simulated in tests.
