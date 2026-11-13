@@ -6,6 +6,12 @@ Built for the Edspire Frontend (React) Developer Technical Challenge, November 2
 
 **Live URL:** _not deployed yet — add the URL here after following [Deployment](#deployment)._
 
+| Desktop | Dark theme | Mobile |
+|---|---|---|
+| ![Desktop, light theme](docs/screenshots/desktop-light.png) | ![Desktop, dark theme](docs/screenshots/desktop-dark.png) | ![Mobile at 375 px](docs/screenshots/mobile.png) |
+
+Offline mode: [docs/screenshots/offline.png](docs/screenshots/offline.png)
+
 ---
 
 ## Features
@@ -57,7 +63,19 @@ npm run preview
 | `VITE_RAPIDAPI_KEY` | City autocomplete via GeoDB | Subscribe to the free Basic plan of [GeoDB Cities on RapidAPI](https://rapidapi.com/wirefreethought/api/geodb-cities) |
 | `VITE_RAPIDAPI_HOST` | GeoDB host | `wft-geo-db.p.rapidapi.com` (default) |
 
-**These keys are not secret.** Every `VITE_` variable is inlined into the JavaScript bundle and visible to anyone who opens the site. That is unavoidable for a client-only app. Use free-tier keys, restrict them in each provider's dashboard where possible, and never reuse a key that has billing attached. `.env*` files are git-ignored.
+`.env*` files are git-ignored; only `.env.example` (no values) is committed.
+
+### Key exposure — read before deploying
+
+**These keys are not secret.** Every `VITE_` variable is inlined into the JavaScript bundle and can be read by anyone who opens the site. That is unavoidable for a client-only app, which is what the brief requires.
+
+What that means in practice:
+
+- **OpenWeatherMap** — the key travels in the request URL (`appid=`), the only form the API accepts. Anyone can copy it and spend the free quota. Use a free key with no billing attached.
+- **RapidAPI** — a RapidAPI key is tied to the RapidAPI *application*, not to one API, so a leaked key can call every API that application is subscribed to. **Create a separate RapidAPI application subscribed only to the free GeoDB plan and use its key here.** Never use a key that also has paid subscriptions.
+- Whether each provider's terms permit publishing a key in browser code was **not verified**: their documentation sites were unreachable from the development environment. Check before relying on this beyond the assessment.
+
+**The proper fix is a small proxy**, not a frontend trick: two serverless functions (for example `api/cities.js` and `api/weather.js` on Vercel) that hold the keys as server-side variables and forward requests. The client would call `/api/…` and ship no keys. It is about 40 lines and the service modules are already isolated enough that only two URLs would change. It was deliberately **not** built, because the brief says "client-side only — no backend to write"; it is the first thing to add for real use.
 
 **The app runs with no keys at all.** Without them it uses Open-Meteo for weather and Open-Meteo's geocoder for search, and says so in the UI.
 
@@ -181,13 +199,24 @@ npm run lint
 npm run build
 ```
 
-`npm test` runs 25 unit tests covering provider normalization, the 3-hourly→daily aggregation (including the time-zone boundary), favourites rules, validation, the reminder "is it due" rule, unit conversion and error messages.
+`npm test` runs 26 unit tests covering provider normalization, the 3-hourly→daily aggregation (including the time-zone boundary and the late-evening case), favourites rules, validation, the reminder "is it due" rule, unit conversion and error messages.
+
+### Live API checks
+
+```bash
+npm run test:live
+```
+
+Makes **one real request per endpoint** through the app's own service modules — no fixtures — and checks the normalized result: finite readings, sunrise before sunset, five consecutive calendar days, Karachi found in Pakistan with sane coordinates. It also asserts that the app's fallback chain picks OpenWeatherMap and GeoDB when their keys are present. Checks for a provider whose key is missing are reported as *skipped*, never as passed. It is kept out of `npm test` because it needs the network and spends free-tier quota.
+
+Run this first after adding keys to `.env.local`.
 
 ### What was verified in a real browser
 
 Run against the production build (`vite preview`) in Chromium via Playwright, at 375, 768 and 1280 px:
 
 - Search: empty/short/non-letter input on blur and on submit, no results, HTTP 500, network failure and retry, keyboard navigation, offline message.
+- Debounce and cancellation, measured on real requests: seven keystrokes 60 ms apart produced **one** request; changing the query while a request was in flight aborted it (`net::ERR_ABORTED`) and its result never appeared.
 - Weather: all current fields, five forecast days, source label, °C/°F switch without reload, persistence across reload.
 - Fallback: a build with deliberately invalid keys received real `401` from OpenWeatherMap and `403` from GeoDB and fell back to Open-Meteo for both, labelled as such.
 - Favourites: add, five-city limit with explanation, switching, confirm / cancel / Escape on removal, persistence across reload, blocked `localStorage`.
@@ -200,7 +229,8 @@ Run against the production build (`vite preview`) in Chromium via Playwright, at
 
 Stated plainly so nothing here is taken on trust:
 
-- **OpenWeatherMap success path** and **GeoDB success path** — no API keys were available during development. Both adapters are written against the providers' documented response formats and unit-tested with fixtures in that shape, but neither has returned live data in this app yet. Test both as soon as keys are added.
+- **OpenWeatherMap success path** and **GeoDB success path** — no API keys were available during development. Both adapters are written against the providers' documented response formats and unit-tested with fixtures in that shape, but neither has returned live data in this app yet. `npm run test:live` exists to close exactly this gap: run it as soon as keys are added.
+- **Live Open-Meteo**: `npm run test:live` passed against the real weather and geocoding endpoints once; two repeat runs timed out on the weather endpoint from the rate-limited development IP.
 - **Real periodic sync scheduling** — the worker's handler was triggered by dispatching the event manually. Chrome actually waking an installed app a day later was not observed.
 - **Installation on a physical phone**, and iOS behaviour generally.
 - **The 300 ms suggestion target** on a normal connection. The debounce is 200 ms, leaving ~100 ms for the round trip; development ran behind a proxy that added about a second, so the real figure could not be measured.
@@ -208,7 +238,7 @@ Stated plainly so nothing here is taken on trust:
 
 ## Deployment
 
-Both `vercel.json` and `netlify.toml` are included: build command `npm run build`, output `dist`, SPA fallback, `no-cache` on `sw.js` so updates are picked up, long-lived caching on hashed assets.
+Both `vercel.json` and `netlify.toml` are included: build command `npm run build`, output `dist`, SPA fallback for page paths only (a missing asset stays a 404, so the service worker can never cache `index.html` as JavaScript), `no-cache` on `sw.js` so updates are picked up, long-lived caching on hashed assets.
 
 **Vercel**
 
@@ -228,7 +258,8 @@ Service workers and notifications require HTTPS; both hosts provide it. After de
 ## Known limitations
 
 - Scheduled reminders are best-effort and Chromium-only, as described above.
-- API keys ship in the bundle. A production version would proxy the providers through a small server.
+- API keys ship in the bundle; see [Key exposure](#key-exposure--read-before-deploying).
+- Requests use `AbortController` with a manual timeout rather than `AbortSignal.any()`, so they work on Safari older than 17.4. The app has only been run in Chromium.
 - "Today" in the OpenWeatherMap forecast covers only the remaining hours of the day, because the free endpoint has no past slots; the current reading is folded into today's range to compensate.
 - Offline data exists only for cities already opened on that device (the six most recent).
 - City names and conditions are English only; times and dates follow the browser locale.

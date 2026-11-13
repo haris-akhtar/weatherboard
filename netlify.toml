@@ -2,6 +2,13 @@
   command = "npm run build"
   publish = "dist"
 
+# A missing hashed asset must be a real 404. If it fell through to the SPA
+# fallback below, the service worker would cache index.html as JavaScript.
+[[redirects]]
+  from = "/assets/*"
+  to = "/404.html"
+  status = 404
+
 [[redirects]]
   from = "/*"
   to = "/index.html"

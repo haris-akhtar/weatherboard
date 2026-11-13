@@ -1,6 +1,6 @@
 import { RefreshCw, Star } from 'lucide-react'
 import { usePreferences } from '../../context/PreferencesContext.jsx'
-import { formatCityTime, formatLocalStamp } from '../../utils/time.js'
+import { dateKey, formatCityTime, formatLocalStamp } from '../../utils/time.js'
 import { compassPoint, formatTemp, formatVisibility, formatWind, tempUnitLabel } from '../../utils/units.js'
 import { IconButton } from '../ui/Button.jsx'
 import { Notice } from '../ui/Notice.jsx'
@@ -51,7 +51,7 @@ function Metric({ label, value, unit, detail }) {
 export function CurrentWeather({ city, report, refreshing, online, isFavourite, favouriteNotice, onToggleFavourite, onRefresh }) {
   const { units } = usePreferences()
   const { current, utcOffsetSeconds } = report
-  const today = report.daily[0]
+  const today = report.daily.find((day) => day.date === dateKey(current.observedAt, utcOffsetSeconds))
   const wind = formatWind(current.windSpeed, units)
   const visibility = formatVisibility(current.visibility, units)
   const tint = current.condition.kind === 'clear' ? (current.isDay ? 'clear-day' : 'clear-night') : current.condition.kind

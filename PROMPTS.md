@@ -636,3 +636,581 @@ Three further failures during testing were mistakes in the test scripts, not the
 - OpenWeatherMap and GeoDB **success** responses (no keys). Their **failure** paths were verified against real `401`/`403` responses.
 - Deployment. Nothing has been deployed; there is no live URL yet.
 - Real-device installation and Chrome's actual periodic-sync schedule.
+
+---
+
+## Prompt 2 — finalization, API integration and deployment (12 Nov 2026)
+
+Given in the same Claude Code session, after the first build was reported.
+
+````markdown
+# MASTER PROMPT — WEATHERBOARD FINALIZATION, API INTEGRATION & DEPLOYMENT
+
+## 1. YOUR ROLE
+
+Act as a Senior React Engineer, Full-Stack Developer, QA Engineer, UI/UX Reviewer, Security Auditor, and Deployment Specialist.
+
+You are working on my Edspire Frontend Developer Technical Challenge (November 2026).
+
+Your mission is to take the existing WeatherBoard project from its current implementation to a fully tested, production-ready, publicly deployed application.
+
+You must prioritize:
+- Real functionality.
+- Clean React architecture.
+- Premium UI/UX.
+- Reliable API integrations.
+- PWA and offline support.
+- Security.
+- Responsive design.
+- Technical correctness.
+- Professional documentation.
+
+Do not generate unnecessary features or rebuild working functionality.
+
+**Think critically, inspect everything, implement carefully, and verify your work.**
+
+---
+
+## 2. PROJECT CONTEXT
+
+Project name: WeatherBoard
+
+Description: A responsive, installable weather dashboard where users can search cities, view current weather and a five-day forecast, save favourite cities, and configure daily weather reminders.
+
+Assessment requirements:
+- React frontend.
+- Client-side application.
+- Public/free-tier REST APIs.
+- PWA.
+- Real weather data.
+- City autocomplete.
+- Five-day forecast.
+- Form validation.
+- Favourite cities.
+- Offline functionality.
+- Notification experience.
+- Responsive design.
+- GitHub repository.
+- Public deployment.
+- README.md.
+- PROMPTS.md.
+
+Estimated assessment development time: 4–6 hours.
+
+Deadline: Saturday, 14 November 2026, 11:00 AM PKT.
+
+---
+
+## 3. EXISTING PROJECT STATUS
+
+The project has already been scaffolded using Vite, React, and Tailwind CSS.
+
+Existing implementation includes:
+- Weather services.
+- City search.
+- Weather dashboard.
+- Forecast components.
+- Favourite cities.
+- Temperature unit switching.
+- Dark/light theme.
+- PWA manifest.
+- Service worker.
+- Offline caching.
+- Notification preferences.
+- README.md.
+- PROMPTS.md.
+- Unit tests.
+- Deployment configuration.
+
+Previous verification reported:
+- Production build successful.
+- Lint successful.
+- 25 unit tests passed.
+- Responsive layouts tested at 375px, 768px, and 1280px.
+- Offline restoration tested.
+- OpenWeatherMap and GeoDB failure paths tested.
+
+However, successful live API integration has not been fully verified.
+
+Do not assume the previous acceptance report is entirely accurate. Inspect the actual code and independently reproduce the tests.
+
+---
+
+## 4. API CONFIGURATION
+
+I will provide my own API credentials.
+
+Required environment variables:
+
+VITE_OPENWEATHER_API_KEY=
+VITE_RAPIDAPI_KEY=
+VITE_RAPIDAPI_HOST=wft-geo-db.p.rapidapi.com
+
+Open-Meteo requires no API key for its free non-commercial service.
+
+Official API resources:
+
+OpenWeatherMap:
+https://openweathermap.org/api
+
+OpenWeatherMap API keys:
+https://home.openweathermap.org/api_keys
+
+OpenWeatherMap pricing:
+https://openweathermap.org/price
+
+GeoDB Cities:
+https://rapidapi.com/wirefreethought/api/geodb-cities
+
+RapidAPI:
+https://rapidapi.com/
+
+Open-Meteo:
+https://open-meteo.com/
+
+Open-Meteo documentation:
+https://open-meteo.com/en/docs
+
+### API integration requirements
+
+Verify:
+
+1. OpenWeatherMap current weather.
+2. OpenWeatherMap five-day forecast.
+3. GeoDB city autocomplete.
+4. Open-Meteo weather fallback.
+5. Open-Meteo geocoding fallback.
+6. Invalid API keys.
+7. HTTP 401, 403, 429, and 500 responses.
+8. Network failures.
+9. Request cancellation.
+10. Loading and error states.
+
+Use actual API responses.
+
+Do not use mocked responses, fixtures, or previously captured responses as proof of successful live integration.
+
+Do not repeatedly hammer free APIs during testing.
+
+Implement appropriate debounce, request cancellation, and caching.
+
+### Security warning
+
+VITE_ variables are embedded in client-side builds.
+
+Never claim that frontend environment variables securely hide API keys.
+
+Check whether the providers' terms permit browser-side requests and public key exposure.
+
+If a secure proxy is necessary, explain the trade-off and propose the smallest practical solution.
+
+Never commit credentials.
+
+---
+
+## 5. TECHNICAL AUDIT
+
+Inspect the entire project before changing anything.
+
+Review:
+
+- package.json.
+- Vite configuration.
+- Tailwind configuration.
+- React components.
+- API service modules.
+- Hooks.
+- State management.
+- Service worker.
+- Manifest.
+- Application icons.
+- localStorage utilities.
+- Error handling.
+- Unit tests.
+- Browser tests.
+- Git history.
+- README.md.
+- PROMPTS.md.
+- Deployment configuration.
+
+Identify:
+- Bugs.
+- Duplicated logic.
+- Unnecessary dependencies.
+- Incorrect API assumptions.
+- Accessibility issues.
+- Performance problems.
+- Security risks.
+- Incomplete features.
+- Misleading documentation.
+
+Create a prioritized list of problems.
+
+Fix critical problems first.
+
+Do not rewrite the entire application just because you prefer a different architecture.
+
+---
+
+## 6. UI/UX QUALITY REVIEW
+
+The application must look like a real commercial weather product, not a generic AI-generated dashboard.
+
+Design references:
+
+- Linear: https://linear.app/
+- Vercel: https://vercel.com/
+- Stripe: https://stripe.com/
+- Mercury: https://mercury.com/
+
+Review:
+
+- Typography hierarchy.
+- Spacing consistency.
+- Color palette.
+- Card layouts.
+- Current weather presentation.
+- Forecast visualization.
+- Search interactions.
+- Loading skeletons.
+- Empty states.
+- Error states.
+- Mobile navigation.
+- Dark/light theme.
+- Button states.
+- Hover and focus states.
+
+Do not add excessive gradients, glassmorphism, animations, or decorative elements.
+
+Every visual element should serve a purpose.
+
+Preserve the existing design direction unless a real usability problem requires modification.
+
+---
+
+## 7. CORE FUNCTIONALITY VERIFICATION
+
+### City Search
+
+Verify:
+- GeoDB autocomplete.
+- Open-Meteo geocoding fallback.
+- Debouncing.
+- Keyboard navigation.
+- Selection.
+- Empty query validation.
+- No-results state.
+- API failure state.
+- Network error state.
+
+The 300ms target refers to the autocomplete debounce/response behavior after typing pauses, not guaranteed third-party network response time.
+
+### Weather Dashboard
+
+Verify:
+- Current temperature.
+- Feels-like temperature.
+- Humidity.
+- Wind speed.
+- Pressure.
+- Visibility where available.
+- Weather conditions.
+- Weather icons.
+- Sunrise and sunset.
+- Last updated timestamp.
+- Five-day forecast.
+- Minimum and maximum temperatures.
+
+Ensure units are correctly converted.
+
+### Favourite Cities
+
+Verify:
+- Maximum five favourites.
+- Duplicate prevention.
+- Add/remove functionality.
+- Removal confirmation.
+- Persistence after reload.
+- localStorage unavailable fallback.
+
+### PWA
+
+Verify:
+- Valid manifest.
+- 192px icon.
+- 512px icon.
+- Standalone display.
+- Theme color.
+- Service worker registration.
+- Application shell caching.
+- Weather response caching.
+- Offline banner.
+- Offline restoration.
+- Reconnection behavior.
+
+### Notifications
+
+The requirement asks for daily notifications even when the browser is closed.
+
+Review the existing implementation carefully.
+
+Explain the differences between:
+- Browser Notifications API.
+- Service Worker notifications.
+- Periodic Background Sync.
+- Web Push.
+- Server-triggered scheduled notifications.
+
+Do not claim guaranteed closed-tab scheduling without real evidence.
+
+Test supported browser behavior and document limitations honestly.
+
+Do not introduce a backend unless it is necessary and I approve the architectural change.
+
+---
+
+## 8. TESTING REQUIREMENTS
+
+Run:
+
+- npm run lint
+- npm run test
+- npm run build
+
+Use the actual commands available in package.json.
+
+If browser automation is available, test the production build in Chromium.
+
+Test viewport sizes:
+
+- 375px.
+- 768px.
+- 1280px.
+
+Test these complete journeys:
+
+1. Load application.
+2. Search for Karachi.
+3. Select Karachi from suggestions.
+4. Fetch real weather.
+5. Display five-day forecast.
+6. Change Celsius/Fahrenheit.
+7. Toggle dark/light mode.
+8. Add favourite city.
+9. Reload application.
+10. Confirm favourite persistence.
+11. Add five cities.
+12. Attempt to add a sixth.
+13. Remove favourite.
+14. Test invalid search.
+15. Test API failure.
+16. Test offline mode.
+17. Reload while offline.
+18. Restore internet.
+19. Test notification permissions.
+20. Test PWA installation where supported.
+
+Record actual results.
+
+Do not mark tests as passed if they were not executed.
+
+---
+
+## 9. GITHUB PREPARATION
+
+Prepare the existing repository for public release.
+
+Verify:
+- .gitignore.
+- .env.example.
+- No committed API keys.
+- No unnecessary files.
+- Clean production build.
+- Complete README.
+- Complete PROMPTS.md.
+- Correct package scripts.
+- No broken imports.
+- No console errors.
+
+I will create or provide access to my GitHub repository.
+
+Do not fabricate a GitHub URL.
+
+Do not destroy existing Git history.
+
+If GitHub credentials are unavailable, prepare the repository and provide the exact commands I need to run.
+
+---
+
+## 10. DEPLOYMENT
+
+Preferred platform: Vercel.
+
+Alternative: Netlify.
+
+Vercel:
+https://vercel.com/new
+
+Netlify:
+https://app.netlify.com/
+
+Deployment steps:
+
+1. Connect the GitHub repository.
+2. Configure build command.
+3. Configure output directory.
+4. Configure environment variables.
+5. Deploy.
+6. Verify the live URL.
+7. Test live API integrations.
+8. Test production PWA behavior.
+9. Test offline functionality.
+10. Update README.md with the actual deployment URL.
+
+Do not claim successful deployment without verifying the live application.
+
+---
+
+## 11. DOCUMENTATION
+
+### README.md
+
+Include:
+
+- Project introduction.
+- Screenshots if available.
+- Features.
+- Technology stack.
+- Project structure.
+- Installation instructions.
+- Environment configuration.
+- API integrations.
+- Architecture decisions.
+- PWA implementation.
+- Offline behavior.
+- Notification limitations.
+- Testing instructions.
+- Deployment instructions.
+- Known limitations.
+- Live application URL.
+
+### PROMPTS.md
+
+Maintain the complete development prompt history.
+
+Include:
+- IDE used.
+- Original master prompt.
+- Follow-up prompts.
+- Debugging instructions.
+- Architectural decisions.
+- Corrections.
+- Important technical decisions.
+
+Do not invent historical prompts.
+
+---
+
+## 12. FINAL ACCEPTANCE REPORT
+
+At completion, produce this report:
+
+| Requirement | Result | Evidence |
+|---|---|---|
+| City autocomplete | Pass/Fail | Actual API test |
+| OpenWeatherMap | Pass/Fail | Live response |
+| Five-day forecast | Pass/Fail | Actual data |
+| Open-Meteo fallback | Pass/Fail | Fallback test |
+| Form validation | Pass/Fail | Browser test |
+| Favourite cities | Pass/Fail | Persistence test |
+| localStorage fallback | Pass/Fail | Storage test |
+| PWA manifest | Pass/Fail | Manifest validation |
+| Service worker | Pass/Fail | Browser inspection |
+| Offline functionality | Pass/Fail | Offline reload |
+| Notifications | Pass/Partial/Fail | Browser evidence |
+| Responsive design | Pass/Fail | Three viewports |
+| Production build | Pass/Fail | Build output |
+| README.md | Pass/Fail | File review |
+| PROMPTS.md | Pass/Fail | File review |
+| GitHub publication | Pass/Fail | Public repository |
+| Deployment | Pass/Fail | Live URL |
+
+Also provide:
+
+1. Bugs fixed.
+2. Remaining limitations.
+3. API credentials still required.
+4. Exact commands to run.
+5. GitHub repository URL.
+6. Live application URL.
+7. Final submission email draft.
+
+---
+
+## 13. STRICT EXECUTION RULES
+
+- Do not rebuild working features.
+- Do not add unnecessary dependencies.
+- Do not fake successful API calls.
+- Do not use mocked data as live evidence.
+- Do not claim untested functionality works.
+- Do not expose API credentials.
+- Do not delete project files without justification.
+- Do not overwrite Git history.
+- Do not deploy broken code.
+- Do not stop after providing an audit report.
+- Implement and fix the issues you identify.
+- Ask me only when a credential, permission, or decision genuinely blocks progress.
+
+Work in small, verifiable stages.
+
+After each major stage, report:
+- What changed.
+- What was tested.
+- What passed.
+- What failed.
+- What remains.
+
+## FINAL OBJECTIVE
+
+Make WeatherBoard a credible technical assessment submission.
+
+The final product must demonstrate that I can understand requirements, work with APIs, build maintainable React applications, debug real problems, implement PWA functionality, and make sound engineering decisions.
+
+Start by inspecting the existing project. Do not assume previous reports are accurate. Audit first, then execute the highest-priority fixes.
+````
+
+### Agent notes for Prompt 2 (written at the end of the work it started)
+
+#### What blocked the stated goal
+
+- **No API keys were supplied.** The agent opened a secure credential form for the RapidAPI key; it was declined. OpenWeatherMap only accepts its key in the request URL, which that form cannot handle. So OpenWeatherMap and GeoDB *success* responses remain unverified.
+- **No GitHub or hosting access.** The session's GitHub token was invalid and no Vercel/Netlify credentials existed, so nothing was pushed or deployed.
+- **Provider terms could not be read.** The documentation sites were outside the session's network allowlist. The README says this instead of asserting what the terms allow.
+
+#### Audit findings and fixes, in priority order
+
+| # | Finding | Severity | Fix |
+|---|---|---|---|
+| 1 | `fetchJson` used `AbortSignal.any()` and `AbortSignal.timeout()`, which do not exist in Safari before 17.4. On those browsers **every** request would have thrown. | Critical | Timeout and cancellation rewired with a plain `AbortController` and timer. |
+| 2 | With OpenWeatherMap, late in the evening the forecast's first slot is already tomorrow. Tomorrow was then shown in the "today" position and its high/low were printed on the current-weather card. | High | The normalizer adds a "today" entry from the current reading; the card looks today up by date instead of taking the first entry. Unit test added. |
+| 3 | The hosting configs rewrote *every* unknown path to `index.html`, including missing hashed assets. After a redeploy the service worker could have cached HTML as JavaScript. | High | Fallback restricted to page paths; missing assets stay 404. |
+| 4 | Search results that came from the fallback during a GeoDB rate limit were cached for the session, hiding GeoDB after it recovered. | Medium | Only stable answers are cached. |
+| 5 | Two results with the same rounded coordinates would share a React key and a favourite id. | Medium | Results are de-duplicated by id. |
+| 6 | The reminder code read the service-worker registration immediately; on a first visit it may not exist yet, giving a false "service worker not running". | Medium | Waits up to four seconds for the worker. |
+| 7 | README implied nothing about RapidAPI keys being application-wide. | Medium (security) | "Key exposure" section added, with a dedicated-application recommendation and the proxy design that was *not* built. |
+| 8 | There was no way to prove live integration without a browser. | Medium | `npm run test:live`: one real request per endpoint through the app's own service modules; skipped (not passed) when a key is missing. |
+
+Reviewed and left alone: `useStoredState` writes to storage inside a state updater (impure but idempotent); the theme does not follow a system change made while the app is open; `sharp` remains a dev dependency for the icon script.
+
+#### Decisions
+
+- **No backend added.** A key-hiding proxy is the right long-term answer, but the brief says client-side only and the prompt requires approval for that change. It is documented as a proposal.
+- **No UI redesign.** The review found no usability problem that justified changing the design direction.
+
+#### What was actually re-run
+
+- `npm run lint`, `npm test` (26 tests), `npm run build`: all pass.
+- `npm run test:live`: Open-Meteo weather and geocoding passed against the real endpoints once; two repeats timed out on the weather endpoint from the rate-limited development IP. OpenWeatherMap and GeoDB checks were skipped for lack of keys.
+- Browser suites on the production build: 77 checks, all passing. In this pass every weather response in the browser was a replay of one real response captured earlier, because Open-Meteo refused the development IP. That run therefore proves the UI, not live integration.
+- Debounce and cancellation measured on real geocoding requests: one request for seven fast keystrokes; an in-flight request aborted when the query changed.

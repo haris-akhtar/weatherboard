@@ -17,8 +17,20 @@ const HALF_DAY_MS = 12 * 60 * 60 * 1000
  *  'unsupported'    no Periodic Background Sync (Firefox, Safari)
  *  'no-worker'      no service worker registration (e.g. the dev server)
  */
+/**
+ * The active registration, or null if none appears within a few seconds.
+ * `serviceWorker.ready` never settles when no worker exists (the dev server),
+ * so it has to be raced against a timer.
+ */
+function activeRegistration(waitMs = 4000) {
+  return Promise.race([
+    navigator.serviceWorker.ready,
+    new Promise((resolve) => setTimeout(() => resolve(null), waitMs)),
+  ])
+}
+
 async function syncBackgroundDelivery(enabled) {
-  const registration = await navigator.serviceWorker.getRegistration()
+  const registration = await activeRegistration()
   if (!registration) return 'no-worker'
   if (!('periodicSync' in registration)) return 'unsupported'
   if (!enabled) {
@@ -90,7 +102,7 @@ export function useReminder() {
 
   /** Ask the service worker for a notification now. Resolves to { ok, message }. */
   const sendTest = useCallback(async () => {
-    const registration = await navigator.serviceWorker.getRegistration()
+    const registration = await activeRegistration()
     if (!registration?.active) {
       return { ok: false, message: 'The service worker isn’t running yet. Reload the page and try again (it only runs in the production build, not the dev server).' }
     }

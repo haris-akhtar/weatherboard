@@ -82,6 +82,25 @@ describe('OpenWeatherMap 3-hourly → daily aggregation', () => {
   })
 })
 
+describe('OpenWeatherMap late-evening edge case', () => {
+  it('adds a "today" entry when the forecast already starts tomorrow', () => {
+    // 23:30 local: the next 3-hour slot (00:00) belongs to the following day.
+    const report = normalizeOpenWeather(
+      {
+        dt: Date.parse('2026-11-12T23:30:00Z') / 1000,
+        timezone: 0,
+        main: { temp: 12, feels_like: 11, humidity: 70, pressure: 1010 },
+        wind: { speed: 4 },
+        weather: [{ id: 500, description: 'light rain', icon: '10n' }],
+      },
+      { list: Array.from({ length: 6 }, (_, i) => slot(`2026-11-${13 + i}T12:00:00Z`, 5, 15, 2)) },
+    )
+    expect(report.daily).toHaveLength(5)
+    expect(report.daily[0]).toMatchObject({ date: '2026-11-12', tempMin: 12, tempMax: 12, condition: { kind: 'rain' } })
+    expect(report.daily[1].date).toBe('2026-11-13')
+  })
+})
+
 describe('Open-Meteo normalization', () => {
   const payload = {
     utc_offset_seconds: 18000,

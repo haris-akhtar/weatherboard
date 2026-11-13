@@ -44,7 +44,16 @@ export async function searchCities(query, { signal } = {}) {
     }
   }
 
-  if (cache.size >= CACHE_LIMIT) cache.delete(cache.keys().next().value)
-  cache.set(key, result)
+  // Two entries for one place (a city and its administrative twin) would share an id.
+  const seen = new Set()
+  result.cities = result.cities.filter((city) => !seen.has(city.id) && seen.add(city.id))
+
+  // Remember stable answers only. A fallback caused by a rate limit or outage
+  // is temporary, and caching it would keep hiding GeoDB after it recovers.
+  const transientFallback = result.fallbackFrom && result.fallbackFrom.kind !== 'config'
+  if (!transientFallback) {
+    if (cache.size >= CACHE_LIMIT) cache.delete(cache.keys().next().value)
+    cache.set(key, result)
+  }
   return result
 }

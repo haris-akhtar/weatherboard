@@ -39,17 +39,24 @@ export function aggregateDaily(slots, utcOffsetSeconds, days = 5) {
 
 export function normalizeOpenWeather(current, forecast) {
   const utcOffsetSeconds = current.timezone ?? 0
-  const daily = aggregateDaily(forecast.list ?? [], utcOffsetSeconds)
+  const weather = current.weather?.[0] ?? {}
+  const condition = conditionFromOwm(weather.id, weather.description)
+  let daily = aggregateDaily(forecast.list ?? [], utcOffsetSeconds)
 
   // The forecast only covers the *rest* of today, so fold the current reading
   // into today's range; otherwise "now" could sit outside today's min/max.
-  const today = daily.find((day) => day.date === dateKey(current.dt * 1000, utcOffsetSeconds))
+  const todayKey = dateKey(current.dt * 1000, utcOffsetSeconds)
+  const today = daily.find((day) => day.date === todayKey)
   if (today) {
     today.tempMin = Math.min(today.tempMin, current.main.temp)
     today.tempMax = Math.max(today.tempMax, current.main.temp)
+  } else {
+    // Late in the evening the next 3-hour slot already belongs to tomorrow, so
+    // the forecast has no entry for today at all. Build one from the current
+    // reading rather than letting tomorrow pose as today.
+    const now = { date: todayKey, tempMin: current.main.temp, tempMax: current.main.temp, windSpeedMax: current.wind?.speed ?? 0, condition }
+    daily = [now, ...daily].slice(0, 5)
   }
-
-  const weather = current.weather?.[0] ?? {}
   return {
     source: OPENWEATHERMAP,
     utcOffsetSeconds,
@@ -65,7 +72,7 @@ export function normalizeOpenWeather(current, forecast) {
       sunrise: current.sys?.sunrise ? current.sys.sunrise * 1000 : null,
       sunset: current.sys?.sunset ? current.sys.sunset * 1000 : null,
       isDay: weather.icon ? weather.icon.endsWith('d') : true,
-      condition: conditionFromOwm(weather.id, weather.description),
+      condition,
     },
     daily,
   }
