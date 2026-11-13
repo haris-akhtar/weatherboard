@@ -1,0 +1,179 @@
+@import 'tailwindcss';
+
+/* ── Design tokens ───────────────────────────────────────────────────────────
+   One warm-neutral surface scale, one ink scale, one accent. Weather itself
+   supplies the colour: the hero tint follows the current condition and the
+   range bars are coloured by actual temperature. */
+:root {
+  --bg: #f4f3ef;
+  --surface: #ffffff;
+  --surface-sunken: #eeede8;
+  --line: #e3e1da;
+  --line-strong: #cfccc3;
+  --ink: #17181c;
+  --ink-muted: #5f626b;
+  --ink-faint: #8b8e96;
+  --accent: #2a5fd0;
+  --accent-soft: #e6edfb;
+  --ok: #1f8a4c;
+  --warn: #a9590a;
+  --warn-soft: #fbf0df;
+  --danger: #c2313a;
+  --danger-soft: #fbe9ea;
+  --sun: #d98a0b;
+  --shadow: 0 1px 2px rgb(23 24 28 / 0.04), 0 8px 24px -12px rgb(23 24 28 / 0.1);
+  --tint: transparent;
+}
+
+[data-theme='dark'] {
+  --bg: #0e0f12;
+  --surface: #16181c;
+  --surface-sunken: #1c1e24;
+  --line: #262930;
+  --line-strong: #383c46;
+  --ink: #edeef0;
+  --ink-muted: #a2a5ae;
+  --ink-faint: #71747d;
+  --accent: #7ea6ff;
+  --accent-soft: #1b2740;
+  --ok: #4cc27f;
+  --warn: #e8a550;
+  --warn-soft: #2a2114;
+  --danger: #f0717a;
+  --danger-soft: #2c181a;
+  --sun: #f2b544;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 12px 32px -16px rgb(0 0 0 / 0.6);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-sunken: var(--surface-sunken);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-muted: var(--ink-muted);
+  --color-faint: var(--ink-faint);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-sun: var(--sun);
+  --shadow-card: var(--shadow);
+  --font-sans: 'Instrument Sans Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+}
+
+@layer base {
+  html {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+  button,
+  [role='option'] {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: var(--accent-soft);
+  }
+  dialog::backdrop {
+    background: rgb(14 15 18 / 0.5);
+    backdrop-filter: blur(2px);
+  }
+}
+
+@layer components {
+  /* Small uppercase mono label used for section headings and metric names. */
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+  }
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* ── Condition tints for the current-weather card ───────────────────────────── */
+[data-tint='clear-day'] { --tint: rgb(240 176 60 / 0.2); }
+[data-tint='clear-night'] { --tint: rgb(104 112 214 / 0.18); }
+[data-tint='partly-cloudy'] { --tint: rgb(120 170 220 / 0.2); }
+[data-tint='cloudy'], [data-tint='fog'] { --tint: rgb(130 138 150 / 0.2); }
+[data-tint='drizzle'], [data-tint='rain'] { --tint: rgb(60 120 200 / 0.2); }
+[data-tint='snow'] { --tint: rgb(120 190 220 / 0.22); }
+[data-tint='thunderstorm'] { --tint: rgb(120 90 200 / 0.22); }
+
+.hero-tint {
+  background-image: radial-gradient(120% 140% at 100% 0%, var(--tint), transparent 60%);
+}
+
+/* ── Motion ─────────────────────────────────────────────────────────────────── */
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+@keyframes drift {
+  0%, 100% { transform: translateX(-3%); }
+  50% { transform: translateX(3%); }
+}
+@keyframes fall {
+  0%, 100% { transform: translateY(-2%); }
+  50% { transform: translateY(3%); }
+}
+@keyframes flicker {
+  0%, 86%, 100% { opacity: 1; }
+  90% { opacity: 0.55; }
+  94% { opacity: 1; }
+  97% { opacity: 0.7; }
+}
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+.animate-rise { animation: rise-in 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.wx-spin { animation: spin-slow 40s linear infinite; }
+.wx-drift { animation: drift 7s ease-in-out infinite; }
+.wx-fall { animation: fall 2.4s ease-in-out infinite; }
+.wx-flicker { animation: flicker 5s linear infinite; }
+
+.skeleton {
+  border-radius: 8px;
+  background: linear-gradient(90deg, var(--surface-sunken) 25%, var(--line) 50%, var(--surface-sunken) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
