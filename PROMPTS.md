@@ -1214,3 +1214,16 @@ Reviewed and left alone: `useStoredState` writes to storage inside a state updat
 - `npm run test:live`: Open-Meteo weather and geocoding passed against the real endpoints once; two repeats timed out on the weather endpoint from the rate-limited development IP. OpenWeatherMap and GeoDB checks were skipped for lack of keys.
 - Browser suites on the production build: 77 checks, all passing. In this pass every weather response in the browser was a replay of one real response captured earlier, because Open-Meteo refused the development IP. That run therefore proves the UI, not live integration.
 - Debounce and cancellation measured on real geocoding requests: one request for seven fast keystrokes; an in-flight request aborted when the query changed.
+
+---
+
+## Prompt 3 — keys supplied (12 Nov 2026)
+
+The user pasted a transcript of a separate chat in which they had obtained an OpenWeatherMap key and a RapidAPI key, and then a Vite error from their own machine (`Failed to resolve import "lucide-react"`). No instruction text accompanied either paste. The keys are not reproduced here.
+
+### Agent notes
+
+- With keys available, the previously unverified paths were run against the real providers: `npm run test:live` passed for OpenWeatherMap (current + forecast), GeoDB and Open-Meteo geocoding; the Open-Meteo weather check received a real HTTP 429 from the rate-limited development IP.
+- In Chromium on the production build, searching "Karachi" returned GeoDB suggestions and loaded live OpenWeatherMap weather and forecast, with no console errors. No code changes were needed.
+- The keys were written only to a git-ignored `.env.local`; nothing containing them was committed or packaged.
+- The `lucide-react` error was diagnosed as an incomplete `node_modules` on the user's machine, not a code fault: the package is listed in `package.json` and the same source builds cleanly.

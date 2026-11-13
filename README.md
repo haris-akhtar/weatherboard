@@ -218,6 +218,7 @@ Run against the production build (`vite preview`) in Chromium via Playwright, at
 - Search: empty/short/non-letter input on blur and on submit, no results, HTTP 500, network failure and retry, keyboard navigation, offline message.
 - Debounce and cancellation, measured on real requests: seven keystrokes 60 ms apart produced **one** request; changing the query while a request was in flight aborted it (`net::ERR_ABORTED`) and its result never appeared.
 - Weather: all current fields, five forecast days, source label, °C/°F switch without reload, persistence across reload.
+- **Live providers with real keys** (12 Nov 2026): typing "Karachi" returned GeoDB results (`200 wft-geo-db.p.rapidapi.com`, list labelled `Results from GeoDB Cities`); selecting it loaded current weather and a five-day forecast from OpenWeatherMap (`200` on both `/weather` and `/forecast`, card labelled `Live · OpenWeatherMap`), with no console errors. `npm run test:live` passed for OpenWeatherMap, GeoDB and Open-Meteo geocoding; the Open-Meteo weather check got a real `429` from the development machine's rate-limited IP in that run (it had passed in an earlier run).
 - Fallback: a build with deliberately invalid keys received real `401` from OpenWeatherMap and `403` from GeoDB and fell back to Open-Meteo for both, labelled as such.
 - Favourites: add, five-city limit with explanation, switching, confirm / cancel / Escape on removal, persistence across reload, blocked `localStorage`.
 - Offline: banner, saved weather kept, **full reload while offline** (shell from the service worker, last city restored), another favourite restored from its saved copy, automatic refresh on reconnect.
@@ -229,8 +230,6 @@ Run against the production build (`vite preview`) in Chromium via Playwright, at
 
 Stated plainly so nothing here is taken on trust:
 
-- **OpenWeatherMap success path** and **GeoDB success path** — no API keys were available during development. Both adapters are written against the providers' documented response formats and unit-tested with fixtures in that shape, but neither has returned live data in this app yet. `npm run test:live` exists to close exactly this gap: run it as soon as keys are added.
-- **Live Open-Meteo**: `npm run test:live` passed against the real weather and geocoding endpoints once; two repeat runs timed out on the weather endpoint from the rate-limited development IP.
 - **Real periodic sync scheduling** — the worker's handler was triggered by dispatching the event manually. Chrome actually waking an installed app a day later was not observed.
 - **Installation on a physical phone**, and iOS behaviour generally.
 - **The 300 ms suggestion target** on a normal connection. The debounce is 200 ms, leaving ~100 ms for the round trip; development ran behind a proxy that added about a second, so the real figure could not be measured.
